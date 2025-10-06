@@ -1,22 +1,22 @@
-name: "Lagon CLI"
-description: "Easily integrate Lagon CLI operations into your Github workflow"
+name: "Lagoss CLI"
+description: "Easily integrate Lagoss CLI operations into your Github workflow"
 branding:
   icon: code
   color: blue
 inputs:
-  lagon_token:
-    description: "Your Lagon API token"
+  lagoss_token:
+    description: "Your Lagoss API token"
     required: true
   command:
-    description: 'The Lagon CLI command to run. For example: "deploy" - will publish your Function'
+    description: 'The Lagoss CLI command to run. For example: "deploy" - will publish your application'
     required: false
     default: "deploy --prod"
   site_url:
-    description: "Specify custom url for self-hosted Lagon instances"
+    description: "Specify custom url for self-hosted Lagoss instances"
     required: false
-    default: "https://dash.lagon.app"
+    default: "https://console.lagoss.com"
   config:
-    description: "Pass in .lagon/config.json file for your function"
+    description: "Pass in .lagoss/config.json file for your application"
     required: false
     default: ""
 outputs:
@@ -29,43 +29,43 @@ runs:
     - name: "Install Node.js"
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: 24
 
     - name: "Install CLI"
       shell: bash
       run: |
-        npm install --global @lagon/cli esbuild
+        npm install --global @lagoss/cli esbuild
 
     - name: "Execute CLI"
       id: cli
       env:
-        LAGON_TOKEN: ${{ inputs.lagon_token }}
-        LAGON_COMMAND: ${{ inputs.command }}
-        LAGON_URL: ${{ inputs.site_url }}
-        LAGON_CONFIG: ${{ inputs.config }}
+        LAGOSS_TOKEN: ${{ inputs.lagoss_token }}
+        LAGOSS_COMMAND: ${{ inputs.command }}
+        LAGOSS_URL: ${{ inputs.site_url }}
+        LAGOSS_CONFIG: ${{ inputs.config }}
       shell: bash
       run: |
-        echo "Configuring Lagon CLI..."
-        if [[ -z "${LAGON_TOKEN}" ]]; then
-            echo "LAGON_TOKEN input is not set"
+        echo "Configuring lagoss CLI..."
+        if [[ -z "${LAGOSS_TOKEN}" ]]; then
+            echo "LAGOSS_TOKEN input is not set"
             exit 1
         fi
 
         # Setup config folders
-        mkdir -p "$HOME/.lagon"
+        mkdir -p "$HOME/.lagoss"
 
         # Setup auth
-        echo \{\"token\":\""${LAGON_TOKEN}"\",\"site_url\":\""${LAGON_URL}"\"\} | jq >"$HOME/.lagon/config.json"
+        echo \{\"token\":\""${LAGOSS_TOKEN}"\",\"site_url\":\""${LAGOSS_URL}"\"\} | jq >"$HOME/.lagoss/config.json"
 
-        # Setup lagon function config if one was provided
-        if [[ -n "${LAGON_CONFIG}" ]]; then
-            echo "LAGON_CONFIG variable set from environment...applying to local directory"
-            mkdir -p .lagon
-            echo "$LAGON_CONFIG" | jq >.lagon/config.json
+        # Setup lagoss function config if one was provided
+        if [[ -n "${LAGOSS_CONFIG}" ]]; then
+            echo "LAGOSS_CONFIG variable set from environment. Applying config ..."
+            mkdir -p .lagoss
+            echo "$LAGOSS_CONFIG" | jq >.lagoss/config.json
         fi
 
         # Run CLI
-        echo "Executing CLI..."
-        eval "lagon $LAGON_COMMAND" | tee lagon.output
+        echo "Executing CLI ..."
+        eval "lagoss $LAGOSS_COMMAND" | tee lagoss.output
         # Action is done!
         exit $?
