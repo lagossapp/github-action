@@ -10,15 +10,15 @@ inputs:
   command:
     description: 'The Lagoss CLI command to run. For example: "deploy" - will publish your application'
     required: false
-    default: "deploy --prod"
-  site_url:
+    default: ""
+  app_id_or_name:
+    description: "The name or id of your application"
+    required: false
+    default: ""
+  console_url:
     description: "Specify custom url for self-hosted Lagoss instances"
     required: false
     default: "https://console.lagoss.com"
-  config:
-    description: "Pass in .lagoss/config.json file for your application"
-    required: false
-    default: ""
 outputs:
   cli_stdout:
     description: "The raw stdout from the CLI command executed"
@@ -40,28 +40,14 @@ runs:
       id: cli
       env:
         LAGOSS_TOKEN: ${{ inputs.lagoss_token }}
-        LAGOSS_COMMAND: ${{ inputs.command }}
-        LAGOSS_URL: ${{ inputs.site_url }}
-        LAGOSS_CONFIG: ${{ inputs.config }}
+        LAGOSS_CONSOLE_URL: ${{ inputs.console_url }}
+        LAGOSS_COMMAND: ${{ inputs.command || format('deploy --prod --app-id-or-name {0}', inputs.app_id_or_name) }}
       shell: bash
       run: |
         echo "Configuring lagoss CLI..."
         if [[ -z "${LAGOSS_TOKEN}" ]]; then
             echo "LAGOSS_TOKEN input is not set"
             exit 1
-        fi
-
-        # Setup config folders
-        mkdir -p "$HOME/.lagoss"
-
-        # Setup auth
-        echo \{\"token\":\""${LAGOSS_TOKEN}"\",\"site_url\":\""${LAGOSS_URL}"\"\} | jq >"$HOME/.lagoss/config.json"
-
-        # Setup lagoss function config if one was provided
-        if [[ -n "${LAGOSS_CONFIG}" ]]; then
-            echo "LAGOSS_CONFIG variable set from environment. Applying config ..."
-            mkdir -p .lagoss
-            echo "$LAGOSS_CONFIG" | jq >.lagoss/config.json
         fi
 
         # Run CLI
