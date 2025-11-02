@@ -45,7 +45,7 @@ runs:
       env:
         LAGOSS_TOKEN: ${{ inputs.lagoss_token }}
         LAGOSS_CONSOLE_URL: ${{ inputs.console_url }}
-        LAGOSS_COMMAND: ${{ inputs.command || format('deploy --app-id-or-name {0} {1}', inputs.app_id_or_name, inputs.prod == true && '--prod' || '') }}
+        LAGOSS_COMMAND: ${{ inputs.command || format('deploy --app-id-or-name {0} {1}', inputs.app_id_or_name, inputs.prod == 'true' && '--prod' || '') }}
       shell: bash
       run: |
         echo "Configuring lagoss CLI..."
