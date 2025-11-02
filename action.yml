@@ -4,13 +4,9 @@ branding:
   icon: code
   color: blue
 inputs:
-  lagoss_token:
+  token:
     description: "Your Lagoss API token"
     required: true
-  command:
-    description: 'The Lagoss CLI command to run. For example: "deploy --prod --app-id-or-name <my-app>" - will publish your application'
-    required: false
-    default: ""
   app_id_or_name:
     description: "The name or id of your application"
     required: false
@@ -23,6 +19,10 @@ inputs:
     description: "Specify custom url for self-hosted Lagoss instances"
     required: false
     default: "https://console.lagoss.com"
+  command:
+    description: 'The Lagoss CLI command to run. For example: "deploy --prod --app-id-or-name <my-app>" - will publish your application'
+    required: false
+    default: ""
 outputs:
   cli_stdout:
     description: "The raw stdout from the CLI command executed"
@@ -43,7 +43,7 @@ runs:
     - name: "Execute CLI"
       id: cli
       env:
-        LAGOSS_TOKEN: ${{ inputs.lagoss_token }}
+        LAGOSS_TOKEN: ${{ inputs.token }}
         LAGOSS_CONSOLE_URL: ${{ inputs.console_url }}
         LAGOSS_COMMAND: ${{ inputs.command || format('deploy --app-id-or-name {0} {1}', inputs.app_id_or_name, inputs.prod == 'true' && '--prod' || '') }}
       shell: bash
