@@ -8,13 +8,17 @@ inputs:
     description: "Your Lagoss API token"
     required: true
   command:
-    description: 'The Lagoss CLI command to run. For example: "deploy" - will publish your application'
+    description: 'The Lagoss CLI command to run. For example: "deploy --prod --app-id-or-name <my-app>" - will publish your application'
     required: false
     default: ""
   app_id_or_name:
     description: "The name or id of your application"
     required: false
     default: ""
+  prod:
+    description: "Publish to production"
+    required: false
+    default: false
   console_url:
     description: "Specify custom url for self-hosted Lagoss instances"
     required: false
@@ -34,14 +38,14 @@ runs:
     - name: "Install CLI"
       shell: bash
       run: |
-        npm install --global @lagoss/cli esbuild
+        npm install --global @lagoss/cli
 
     - name: "Execute CLI"
       id: cli
       env:
         LAGOSS_TOKEN: ${{ inputs.lagoss_token }}
         LAGOSS_CONSOLE_URL: ${{ inputs.console_url }}
-        LAGOSS_COMMAND: ${{ inputs.command || format('deploy --prod --app-id-or-name {0}', inputs.app_id_or_name) }}
+        LAGOSS_COMMAND: ${{ inputs.command || format('deploy --app-id-or-name {0} {1}', inputs.app_id_or_name, inputs.prod && '--prod' || '') }}
       shell: bash
       run: |
         echo "Configuring lagoss CLI..."
